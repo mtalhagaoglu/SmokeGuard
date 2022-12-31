@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "35693728405",
+    "firebase_url": "https://smokeguard-d10da-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "smokeguard-d10da",
+    "storage_bucket": "smokeguard-d10da.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:35693728405:android:c021ad748acb2033a1819c",
+        "android_client_info": {
+          "package_name": "com.smokeguard"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "35693728405-dhg808sl0gm0eqojbauc86mvr7620qg4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-ffKHONy6PUz3qyo5dwQrvKrQVeAAROQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "35693728405-dhg808sl0gm0eqojbauc86mvr7620qg4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

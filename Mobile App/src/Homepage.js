@@ -5,10 +5,11 @@ import {
   StyleSheet,
   SafeAreaView,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-
-import {fetchData} from './api';
+import firebase from '@react-native-firebase/app';
+import database from '@react-native-firebase/database';
 
 import {LineChart} from 'react-native-chart-kit';
 
@@ -16,36 +17,31 @@ const Homepage = () => {
   const [data, setData] = useState({0: 0});
   const [loading, setLoading] = useState(true);
   const {width} = useWindowDimensions();
-  let unsubscribe = () => console.log('unsubscribed');
-  const first = async () => {
-    const res = await fetchData(5);
-    let temp = {};
-    res.map(item => {
-      temp[new Date(item.created_at).getTime()] = parseFloat(item.field1);
-    });
-    setData(temp);
-    setLoading(false)
-  };
+  let unsubscribe;
   useEffect(() => {
-    first(5);
-    unsubscribe = setInterval(async () => {
-      const res = await fetchData();
-      if (res.created_at && res.field1 && data[new Date(res.created_at).getTime()] !== parseFloat(res.field1) && !loading) {
-        setData({...data, [new Date(res.created_at).getTime()]: parseFloat(res.field1)});
-        console.log('New Data', res.field1);
-      }else{
-        console.log("Okudum 2 saniye sonra tekrar okuyacağım",res.field1)
-      }
-      
-    }, 2000);
-    return () => {
-      try {
-        unsubscribe();
-      } catch (error) {
-        console.log(error);
-      }
-    };
+    unsubscribe = database()
+      .ref('gas_ppm')
+      .limitToLast(10)
+      .on('child_added', snapshot => {
+        const child = snapshot.val();
+        if (child.created_at !== undefined && child.value !== undefined) {
+          setData(prev => ({...prev, [child.created_at]: child.value}));
+        }
+      });
+    return () => {};
   }, []);
+
+  const putData = () => {
+    try {
+      firebase
+        .database()
+        .ref('gas_ppm')
+        .push({
+          value: Math.floor(Math.random() * 1000),
+          created_at: new Date().getTime(),
+        });
+    } catch (error) {}
+  };
 
   const Chart = () => {
     return (
@@ -53,17 +49,20 @@ const Homepage = () => {
         <Text style={styles.containerTitle}>Yanıcı Gaz Ölçüm Tablosu</Text>
         <LineChart
           data={{
-            labels: Object.keys(data),
+            labels: Object.keys(data).slice(-10),
             datasets: [
               {
-                data: Object.values(data),
+                data: Object.values(data).slice(-10),
               },
             ],
           }}
           width={width - 48 - 20}
-          height={150}
+          height={200}
           verticalLabelRotation={30}
           bezier
+          formatXLabel={value => {
+            return new Date(parseInt(value)).toLocaleTimeString();
+          }}
           chartConfig={{
             backgroundColor: 'white',
             backgroundGradientFrom: 'white',
@@ -79,6 +78,11 @@ const Homepage = () => {
               strokeWidth: '2',
               stroke: '#145674',
             },
+            propsForLabels: {
+              fontSize: '10',
+              fill: 'rgba(10, 10, 10, 1)',
+              fontWeight: 500,
+            },
           }}
           style={styles.chart}
         />
@@ -88,12 +92,12 @@ const Homepage = () => {
 
   return (
     <SafeAreaView style={[StyleSheet.absoluteFill, styles.page]}>
-      <View style={styles.header}>
+      <TouchableOpacity onPress={putData} style={styles.header}>
         {/* <Text style={styles.headerText}>Smoke Guard - Duman Dedektörü</Text> */}
         <Text style={styles.headerText}>
           Merhaba, <Text style={styles.name}>Talha</Text>!
         </Text>
-      </View>
+      </TouchableOpacity>
       <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
         <View>
           <Text style={styles.statusEmoji}>😁</Text>
